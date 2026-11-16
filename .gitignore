@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+results/
+.env
+.venv/
+
+# 课程材料不入库（PDF 太大，且不宜在公开仓库分发课程讲义）
+Lecture 8*.pdf
+lecture8_text.txt
+
+# 个人本机配置，不入库
+.claude/settings.local.json

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "dev_001",
+    "type": "single",
+    "user": "Book a meeting titled 'sync' with alice on 2026-11-16 at 10:00.",
+    "failures": [{"call": 1, "error": "RateLimit", "persist": false}],
+    "expected": {
+      "calendar": {"contains_meeting": [
+        {"title": "sync", "time": "2026-11-16 10:00", "attendees": ["alice"]}
+      ]}
+    }
+  },
+  {
+    "id": "dev_002",
+    "type": "single",
+    "user": "Book a meeting titled 'sync' with alice tomorrow at 10am.",
+    "failures": [{"call": 1, "error": "Validation", "persist": true}],
+    "expected": {
+      "calendar": {"contains_meeting": [
+        {"title": "sync", "time": "2026-11-16 10:00", "attendees": ["alice"]}
+      ]}
+    }
+  },
+  {
+    "id": "dev_003",
+    "type": "chained",
+    "user": "Book a meeting titled 'sync' with alice on 2026-11-16 at 10:00, then email alice the time.",
+    "failures": [],
+    "expected": {
+      "calendar": {"contains_meeting": [
+        {"title": "sync", "time": "2026-11-16 10:00", "attendees": ["alice"]}
+      ]},
+      "outbox": {"contains_email": [
+        {"to": "alice@example.com", "subject": "sync time", "body_contains": "10:00"}
+      ]}
+    }
+  },
+  {
+    "id": "dev_004",
+    "type": "chained",
+    "user": "Book a meeting titled 'review' with bob on 2026-11-17 at 15:00, then email bob the time.",
+    "failures": [{"call": 2, "error": "RateLimit", "persist": false}],
+    "expected": {
+      "calendar": {"contains_meeting": [
+        {"title": "review", "time": "2026-11-17 15:00", "attendees": ["bob"]}
+      ]},
+      "outbox": {"contains_email": [
+        {"to": "bob@example.com", "subject": "review time", "body_contains": "15:00"}
+      ]}
+    }
+  },
+  {
+    "id": "dev_005",
+    "type": "ambiguous",
+    "user": "Book a meeting with the team about the project.",
+    "failures": [],
+    "expected": {
+      "no_tool_calls": true,
+      "calendar": {"empty": true},
+      "outbox": {"empty": true}
+    }
+  },
+  {
+    "id": "dev_006",
+    "type": "single",
+    "user": "Send an email to bob@example.com with subject 'reminder' and body 'review at 15:00'.",
+    "failures": [{"call": 1, "error": "Timeout", "persist": false}],
+    "expected": {
+      "outbox": {"contains_email": [
+        {"to": "bob@example.com", "subject": "reminder", "body_contains": "15:00"}
+      ]}
+    }
+  }
+]
